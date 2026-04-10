@@ -1,0 +1,55 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+*.egg
+dist/
+build/
+*.whl
+
+# Virtual environment
+.venv/
+venv/
+env/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Project-specific: generated reports
+report.md
+report*.md
+
+# Project-specific: media files
+*.mp3
+*.mp4
+*.wav
+*.m4a
+*.flac
+*.ogg
+*.webm
+
+# Project-specific: database
+interviews.db
+*.db
+
+# Project-specific: audio recordings
+audio_recordings/
+
+# Project-specific: PDF uploads
+*.pdf
+
+# Claude Code local settings
+.claude/settings.local.json
+
+# Environment variables
+.env
+.env.local
+!.env.example

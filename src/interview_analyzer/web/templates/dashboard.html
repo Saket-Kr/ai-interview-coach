@@ -1,0 +1,86 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard — Interview Simulator{% endblock %}
+
+{% block content %}
+<h2>Interview History</h2>
+
+{% if interviews %}
+<figure>
+<table>
+    <thead>
+        <tr>
+            <th>Date</th>
+            <th>Domain</th>
+            <th>Role</th>
+            <th>Difficulty</th>
+            <th>Duration</th>
+            <th>Score</th>
+            <th>Status</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for i in interviews %}
+        <tr>
+            <td>{{ i.created_at[:16] }}</td>
+            <td>{{ i.domain }}</td>
+            <td>{{ i.role_level }}</td>
+            <td>{{ i.difficulty | capitalize }}</td>
+            <td>{{ i.duration_minutes }} min</td>
+            <td>
+                {% if i.overall_score %}
+                    <strong>{{ "%.1f"|format(i.overall_score) }}/10</strong>
+                {% else %}
+                    —
+                {% endif %}
+            </td>
+            <td>
+                {% if i.status == 'completed' and i.overall_score %}
+                    <span style="color: var(--pico-ins-color);">Completed</span>
+                {% elif i.status == 'analyzing' %}
+                    <span aria-busy="true">Analyzing</span>
+                {% elif i.status == 'in_progress' %}
+                    <span style="color: var(--pico-primary);">In Progress</span>
+                {% elif i.status == 'error' %}
+                    <span style="color: var(--pico-del-color);">Error</span>
+                {% elif i.status == 'abandoned' %}
+                    <span style="opacity:0.5;">Abandoned</span>
+                {% else %}
+                    {{ i.status | capitalize }}
+                {% endif %}
+            </td>
+            <td style="white-space: nowrap;">
+                {% if i.status == 'completed' and i.overall_score %}
+                    <a href="/dashboard/{{ i.id }}" role="button" class="outline secondary" style="padding: 0.25rem 0.75rem; font-size: 0.85rem;">View Report</a>
+                {% elif i.status == 'error' %}
+                    <form method="POST" action="/api/interviews/{{ i.id }}/analyze" style="display:inline;">
+                        <button type="submit" class="outline" style="padding: 0.25rem 0.75rem; font-size: 0.85rem;">Retry</button>
+                    </form>
+                {% endif %}
+                <button class="outline secondary" style="padding: 0.25rem 0.75rem; font-size: 0.85rem;"
+                    onclick="if(confirm('Delete this interview?')) fetch('/api/interviews/{{ i.id }}', {method:'DELETE'}).then(() => location.reload())">
+                    Delete
+                </button>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+</figure>
+{% else %}
+<article style="text-align:center;">
+    <p>No interviews yet. <a href="/">Start your first mock interview</a>.</p>
+</article>
+{% endif %}
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Auto-refresh every 10s if any interview is still analyzing
+const hasAnalyzing = {{ 'true' if interviews | selectattr('status', 'equalto', 'analyzing') | list else 'false' }};
+if (hasAnalyzing) {
+    setTimeout(() => location.reload(), 10000);
+}
+</script>
+{% endblock %}

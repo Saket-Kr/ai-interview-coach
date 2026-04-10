@@ -1,0 +1,182 @@
+{% extends "base.html" %}
+
+{% block title %}Report — {{ interview.domain }} Interview{% endblock %}
+
+{% block head %}
+<style>
+    .score-badge { font-size: 2rem; font-weight: bold; }
+    .score-badge.good { color: var(--pico-ins-color); }
+    .score-badge.mid { color: #ff9800; }
+    .score-badge.low { color: var(--pico-del-color); }
+    .qa-card { margin-bottom: 1.5rem; }
+    .score-table td:first-child { font-weight: 600; }
+    .score-table td:last-child { text-align: center; font-variant-numeric: tabular-nums; }
+    .severity-critical { color: var(--pico-del-color); font-weight: bold; }
+    .severity-important { color: #ff9800; font-weight: bold; }
+    .severity-polish { color: var(--pico-ins-color); }
+    details { margin-bottom: 1rem; }
+    .transcript-msg { padding: 0.5rem 0; border-bottom: 1px solid var(--pico-muted-border-color); }
+    .transcript-msg .role { font-weight: bold; text-transform: uppercase; font-size: 0.8rem; }
+    .transcript-msg .role.interviewer { color: var(--pico-primary); }
+    .transcript-msg .role.candidate { color: var(--pico-secondary); }
+</style>
+{% endblock %}
+
+{% block content %}
+<a href="/dashboard">&larr; Back to Dashboard</a>
+
+<header style="margin: 1rem 0;">
+    <h2>Interview Analysis Report</h2>
+    <div class="grid" style="align-items:center;">
+        <div>
+            <p><strong>Domain:</strong> {{ interview.domain }}<br>
+            <strong>Role:</strong> {{ interview.role_level }}<br>
+            <strong>Difficulty:</strong> {{ interview.difficulty | capitalize }}<br>
+            <strong>Duration:</strong> {{ interview.duration_minutes }} min</p>
+        </div>
+        <div style="text-align:center;">
+            {% if report %}
+                {% set score = report.overall.overall_score %}
+                <div class="score-badge {% if score >= 7 %}good{% elif score >= 5 %}mid{% else %}low{% endif %}">
+                    {{ "%.1f"|format(score) }} / 10
+                </div>
+                <div>Overall Score</div>
+            {% else %}
+                <p aria-busy="true">Analysis pending...</p>
+            {% endif %}
+        </div>
+    </div>
+</header>
+
+{% if report %}
+
+<article>
+    <h3>Executive Summary</h3>
+    <p>{{ report.overall.executive_summary }}</p>
+</article>
+
+<article>
+    <h3>Role Fit Assessment</h3>
+    <p>{{ report.overall.role_fit }}</p>
+</article>
+
+<h3>Per-Question Breakdown</h3>
+{% for qa in report.question_analyses %}
+<article class="qa-card">
+    <header>
+        <strong>Q{{ qa.qa.question_number }}: {{ qa.qa.topic }}</strong>
+        — {{ "%.1f"|format(qa.overall_score) }}/10
+    </header>
+
+    <blockquote>{{ qa.qa.question }}</blockquote>
+
+    <div class="grid">
+        <div>
+            <h5>Content</h5>
+            <table class="score-table" role="grid">
+                <tr><td>Accuracy</td><td>{{ qa.content.technical_accuracy }}/10</td></tr>
+                <tr><td>Depth</td><td>{{ qa.content.depth }}/10</td></tr>
+                <tr><td>Specificity</td><td>{{ qa.content.specificity }}/10</td></tr>
+                <tr><td>Completeness</td><td>{{ qa.content.completeness }}/10</td></tr>
+                <tr><td>Trade-offs</td><td>{{ qa.content.tradeoff_awareness }}/10</td></tr>
+            </table>
+            <p><small>{{ qa.content.commentary }}</small></p>
+        </div>
+        <div>
+            <h5>Communication</h5>
+            <table class="score-table" role="grid">
+                <tr><td>Structure</td><td>{{ qa.communication.structure }}/10</td></tr>
+                <tr><td>Conciseness</td><td>{{ qa.communication.conciseness }}/10</td></tr>
+                <tr><td>Clarity</td><td>{{ qa.communication.clarity }}/10</td></tr>
+                <tr><td>Recovery</td><td>{{ qa.communication.recovery }}/10</td></tr>
+                <tr><td>Fillers</td><td>{{ qa.communication.filler_word_count }}</td></tr>
+            </table>
+            <p><small>{{ qa.communication.commentary }}</small></p>
+        </div>
+    </div>
+
+    <h5>Interaction</h5>
+    <table class="score-table" role="grid" style="max-width:400px;">
+        <tr><td>Clarifying Qs</td><td>{{ qa.interaction.clarifying_questions }}/10</td></tr>
+        <tr><td>Listening</td><td>{{ qa.interaction.listening }}/10</td></tr>
+        <tr><td>Adaptability</td><td>{{ qa.interaction.adaptability }}/10</td></tr>
+    </table>
+    <p><small>{{ qa.interaction.commentary }}</small></p>
+
+    {% if qa.content.strengths %}
+    <h5>Strengths</h5>
+    <ul>{% for s in qa.content.strengths %}<li>{{ s }}</li>{% endfor %}</ul>
+    {% endif %}
+
+    {% if qa.content.gaps %}
+    <h5>Gaps</h5>
+    <ul>{% for g in qa.content.gaps %}<li>{{ g }}</li>{% endfor %}</ul>
+    {% endif %}
+</article>
+{% endfor %}
+
+{% if report.overall.technical_depth_map %}
+<article>
+    <h3>Technical Depth Map</h3>
+    <table>
+        <thead><tr><th>Topic</th><th>Depth</th><th>Evidence</th></tr></thead>
+        <tbody>
+        {% for e in report.overall.technical_depth_map %}
+        <tr><td>{{ e.topic }}</td><td>{{ e.depth | capitalize }}</td><td>{{ e.evidence }}</td></tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</article>
+{% endif %}
+
+<article>
+    <h3>Communication Profile</h3>
+    <p>{{ report.overall.communication_profile }}</p>
+</article>
+
+<div class="grid">
+    <article>
+        <h3>Strengths</h3>
+        <ul>{% for s in report.overall.strengths %}<li>{{ s }}</li>{% endfor %}</ul>
+    </article>
+    <article>
+        <h3>Weaknesses</h3>
+        <ul>{% for w in report.overall.weaknesses %}<li>{{ w }}</li>{% endfor %}</ul>
+    </article>
+</div>
+
+<article>
+    <h3>Improvement Plan</h3>
+    {% for imp in report.overall.improvements %}
+    <div style="margin-bottom:1rem; padding-left:1rem; border-left: 3px solid {% if imp.severity == 'critical' %}var(--pico-del-color){% elif imp.severity == 'important' %}#ff9800{% else %}var(--pico-ins-color){% endif %};">
+        <p><span class="severity-{{ imp.severity }}">{{ imp.severity | upper }}</span> — <strong>{{ imp.area }}</strong></p>
+        <p><strong>Gap:</strong> {{ imp.gap }}</p>
+        <p><strong>Study:</strong> {{ imp.what_to_study }}</p>
+        <p><strong>Practice:</strong> {{ imp.how_to_practice }}</p>
+        {% if imp.reference_moment %}<p><small>Observed in: {{ imp.reference_moment }}</small></p>{% endif %}
+    </div>
+    {% endfor %}
+</article>
+
+{% if report.overall.practice_prompts %}
+<article>
+    <h3>Practice Questions</h3>
+    <ol>{% for q in report.overall.practice_prompts %}<li>{{ q }}</li>{% endfor %}</ol>
+</article>
+{% endif %}
+
+{% endif %}
+
+<details>
+    <summary>Full Transcript</summary>
+    <div style="padding: 1rem;">
+        {% for m in messages %}
+        <div class="transcript-msg">
+            <span class="role {{ m.role }}">{{ m.role }}</span>
+            <span style="opacity:0.5; font-size:0.75rem;"> ({{ "%.0f"|format(m.elapsed_seconds) }}s)</span>
+            <p style="margin:0.25rem 0 0;">{{ m.content }}</p>
+        </div>
+        {% endfor %}
+    </div>
+</details>
+{% endblock %}

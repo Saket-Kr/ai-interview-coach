@@ -1,0 +1,87 @@
+/* Custom styles for Interview Simulator */
+
+:root {
+    --chat-interviewer-bg: #1a2a3a;
+    --chat-candidate-bg: #2a1a3a;
+}
+
+body {
+    min-height: 100vh;
+}
+
+nav {
+    padding: 0.5rem 2rem;
+}
+
+/* Setup page */
+#setup-form button[type="submit"] {
+    width: 100%;
+    margin-top: 1rem;
+}
+
+/* Interview page - make chat fill available space */
+.chat-messages {
+    min-height: 300px;
+    background: var(--pico-card-background-color);
+    border-radius: 8px;
+}
+
+.chat-msg {
+    word-wrap: break-word;
+    white-space: pre-wrap;
+}
+
+.chat-msg.interviewer {
+    background: var(--chat-interviewer-bg);
+    border-bottom-left-radius: 4px;
+}
+
+.chat-msg.candidate {
+    background: var(--chat-candidate-bg);
+    border-bottom-right-radius: 4px;
+}
+
+/* Typing indicator animation */
+.typing-indicator::after {
+    content: '';
+    animation: dots 1.5s infinite;
+}
+
+@keyframes dots {
+    0% { content: ''; }
+    25% { content: '.'; }
+    50% { content: '..'; }
+    75% { content: '...'; }
+}
+
+/* Report page */
+.qa-card header {
+    font-size: 1.1rem;
+}
+
+.qa-card blockquote {
+    font-style: italic;
+    border-left: 3px solid var(--pico-primary);
+    padding: 0.5rem 1rem;
+    margin: 0.5rem 0;
+}
+
+.score-table {
+    font-size: 0.9rem;
+}
+
+/* Dashboard */
+table tbody tr {
+    cursor: default;
+}
+
+/* Analysis overlay */
+#analysis-overlay {
+    display: none;
+    align-items: center;
+    justify-content: center;
+}
+
+#analysis-overlay article {
+    margin: 0;
+}

@@ -1,0 +1,98 @@
+{% extends "base.html" %}
+
+{% block title %}New Interview — Interview Simulator{% endblock %}
+
+{% block content %}
+<article>
+    <header>
+        <h2>Start a Mock Interview</h2>
+        <p>Configure your practice session and click start. An AI interviewer will conduct a realistic technical interview.</p>
+    </header>
+
+    <form id="setup-form">
+        <div class="grid">
+            <label>
+                Domain
+                <select name="domain" required>
+                    {% for d in domains %}
+                    <option value="{{ d }}">{{ d }}</option>
+                    {% endfor %}
+                </select>
+            </label>
+
+            <label>
+                Role / Level
+                <select name="role_level" required>
+                    {% for r in role_levels %}
+                    <option value="{{ r }}">{{ r }}</option>
+                    {% endfor %}
+                </select>
+            </label>
+        </div>
+
+        <div class="grid">
+            <label>
+                Difficulty
+                <select name="difficulty" required>
+                    {% for d in difficulties %}
+                    <option value="{{ d }}">{{ d | capitalize }}</option>
+                    {% endfor %}
+                </select>
+            </label>
+
+            <label>
+                Duration
+                <select name="duration_minutes" required>
+                    {% for d in durations %}
+                    <option value="{{ d }}">{{ d }} minutes</option>
+                    {% endfor %}
+                </select>
+            </label>
+        </div>
+
+        <button type="submit" id="start-btn">Start Interview</button>
+    </form>
+
+    <div id="loading" style="display:none; text-align:center;">
+        <p aria-busy="true">Preparing your interview — generating topic plan...</p>
+    </div>
+</article>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.getElementById('setup-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const form = e.target;
+    const btn = document.getElementById('start-btn');
+    const loading = document.getElementById('loading');
+
+    btn.disabled = true;
+    btn.setAttribute('aria-busy', 'true');
+    loading.style.display = 'block';
+
+    const body = {
+        domain: form.domain.value,
+        role_level: form.role_level.value,
+        difficulty: form.difficulty.value,
+        duration_minutes: parseInt(form.duration_minutes.value),
+    };
+
+    try {
+        const res = await fetch('/api/interviews', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify(body),
+        });
+        if (!res.ok) throw new Error(await res.text());
+        const data = await res.json();
+        window.location.href = data.redirect_url;
+    } catch (err) {
+        alert('Failed to create interview: ' + err.message);
+        btn.disabled = false;
+        btn.removeAttribute('aria-busy');
+        loading.style.display = 'none';
+    }
+});
+</script>
+{% endblock %}

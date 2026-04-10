@@ -1,0 +1,164 @@
+# Interview Analysis Report
+
+**Role**: {{ role }}
+**Overall Score**: {{ "%.1f"|format(result.overall.overall_score) }} / 10
+
+---
+
+## Executive Summary
+
+{{ result.overall.executive_summary }}
+
+---
+
+## Role Fit Assessment
+
+{{ result.overall.role_fit }}
+
+---
+
+## Per-Question Breakdown
+
+{% for qa in result.question_analyses %}
+### Q{{ qa.qa.question_number }}: {{ qa.qa.topic }}
+
+**Score: {{ "%.1f"|format(qa.overall_score) }} / 10**
+
+> **Question**: {{ qa.qa.question }}
+
+#### Content (Technical)
+
+| Criterion | Score |
+|---|---|
+| Technical Accuracy | {{ qa.content.technical_accuracy }}/10 |
+| Depth | {{ qa.content.depth }}/10 |
+| Specificity | {{ qa.content.specificity }}/10 |
+| Completeness | {{ qa.content.completeness }}/10 |
+| Trade-off Awareness | {{ qa.content.tradeoff_awareness }}/10 |
+
+{{ qa.content.commentary }}
+
+**Strengths:**
+{% for s in qa.content.strengths %}
+- {{ s }}
+{% endfor %}
+
+**Gaps:**
+{% for g in qa.content.gaps %}
+- {{ g }}
+{% endfor %}
+
+#### Communication & Delivery
+
+| Criterion | Score |
+|---|---|
+| Structure | {{ qa.communication.structure }}/10 |
+| Conciseness | {{ qa.communication.conciseness }}/10 |
+| Clarity | {{ qa.communication.clarity }}/10 |
+| Recovery Under Pressure | {{ qa.communication.recovery }}/10 |
+| Filler Words | {{ qa.communication.filler_word_count }} instances |
+
+{{ qa.communication.commentary }}
+
+{% if qa.communication.filler_words %}
+*Filler words detected: {{ qa.communication.filler_words | join(", ") }}*
+{% endif %}
+
+#### Interaction Quality
+
+| Criterion | Score |
+|---|---|
+| Clarifying Questions | {{ qa.interaction.clarifying_questions }}/10 |
+| Listening | {{ qa.interaction.listening }}/10 |
+| Adaptability | {{ qa.interaction.adaptability }}/10 |
+
+{{ qa.interaction.commentary }}
+
+---
+
+{% endfor %}
+
+## Technical Depth Map
+
+| Topic | Depth | Evidence |
+|---|---|---|
+{% for entry in result.overall.technical_depth_map %}
+| {{ entry.topic }} | {{ entry.depth.value | capitalize }} | {{ entry.evidence }} |
+{% endfor %}
+
+---
+
+## Communication Profile
+
+{{ result.overall.communication_profile }}
+
+---
+
+## Strengths
+
+{% for s in result.overall.strengths %}
+- {{ s }}
+{% endfor %}
+
+## Weaknesses
+
+{% for w in result.overall.weaknesses %}
+- {{ w }}
+{% endfor %}
+
+---
+
+## Improvement Plan
+
+{% set critical = result.overall.improvements | selectattr("severity.value", "equalto", "critical") | list %}
+{% set important = result.overall.improvements | selectattr("severity.value", "equalto", "important") | list %}
+{% set polish = result.overall.improvements | selectattr("severity.value", "equalto", "polish") | list %}
+
+{% if critical %}
+### 🔴 Critical (would likely cause rejection)
+
+{% for imp in critical %}
+**{{ imp.area }}**
+- **Gap**: {{ imp.gap }}
+- **What to study**: {{ imp.what_to_study }}
+- **How to practice**: {{ imp.how_to_practice }}
+- *Observed in*: {{ imp.reference_moment }}
+
+{% endfor %}
+{% endif %}
+
+{% if important %}
+### 🟡 Important (differentiates good from great)
+
+{% for imp in important %}
+**{{ imp.area }}**
+- **Gap**: {{ imp.gap }}
+- **What to study**: {{ imp.what_to_study }}
+- **How to practice**: {{ imp.how_to_practice }}
+- *Observed in*: {{ imp.reference_moment }}
+
+{% endfor %}
+{% endif %}
+
+{% if polish %}
+### 🟢 Polish (nice to have)
+
+{% for imp in polish %}
+**{{ imp.area }}**
+- **Gap**: {{ imp.gap }}
+- **What to study**: {{ imp.what_to_study }}
+- **How to practice**: {{ imp.how_to_practice }}
+- *Observed in*: {{ imp.reference_moment }}
+
+{% endfor %}
+{% endif %}
+
+---
+
+## Practice Questions
+
+Target these to strengthen your weakest areas:
+
+{% for q in result.overall.practice_prompts %}
+{{ loop.index }}. {{ q }}
+{% endfor %}
