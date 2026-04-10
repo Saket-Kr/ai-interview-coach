@@ -12,9 +12,9 @@ class Config(BaseModel):
     llm_model: str = os.getenv(
         "INTERVIEW_ANALYZER_LLM_MODEL", "Qwen/Qwen3-235B-A22B-FP8"
     )
-    whisper_model: str = "base"
-    whisper_compute_type: str = "int8"
-    whisper_device: str = "cpu"
+    whisper_model: str = os.getenv("WHISPER_MODEL", "base")
+    whisper_compute_type: str = os.getenv("WHISPER_COMPUTE_TYPE", "int8")
+    whisper_device: str = os.getenv("WHISPER_DEVICE", "cpu")
     hf_token: str | None = os.getenv("HF_TOKEN", None)
     max_tokens: int = 4096
     temperature: float = 0.3
